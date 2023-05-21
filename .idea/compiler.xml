@@ -12,7 +12,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="workshop" options="" />
+      <module name="workshop" options="--add-exports javafx.controls/javafx=workshop" />
     </option>
   </component>
 </project>

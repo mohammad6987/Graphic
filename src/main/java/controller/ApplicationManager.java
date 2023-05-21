@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 public class ApplicationManager {
     public static String Address1= "C:\\Users\\Lenovo\\Downloads\\Telegram Desktop\\workshop\\src\\main\\resources\\Users.json";
     public static User loggedUser;
+
     public static void saveUsers() {
         if(Data.getUsers() != null) {
             Gson gson = new Gson();
@@ -56,7 +57,7 @@ public class ApplicationManager {
         else
           x.add(0,current.get(1));
         User unknown;
-        for(int i=2;i<current.size();i++){
+       /* for(int i=2;i<current.size();i++){
             unknown=current.get(i);
             int index=0;
             while(index<current.size()){
@@ -66,7 +67,7 @@ public class ApplicationManager {
                     break ;
             }
             x.add(index,unknown);
-        }
+        }*/
         Data.setUsers(x);
     }
     public static void deleteUser(User user){

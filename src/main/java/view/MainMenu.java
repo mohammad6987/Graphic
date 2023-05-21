@@ -188,7 +188,7 @@ public class MainMenu extends Application {
             }
         });
         stackPane4.setOnMousePressed(mouseEvent -> {
-            if(ApplicationManager.loggedUser==null || ApplicationManager.loggedUser.SavedGame==null){
+            if(ApplicationManager.loggedUser==null ){
                 Alert alert=new Alert(Alert.AlertType.ERROR);
                 alert.setContentText("you haven't logged in or you don't have any saved game!");
                 alert.showAndWait();
@@ -201,7 +201,7 @@ public class MainMenu extends Application {
         });
         stackPane6.setOnMousePressed(mouseEvent -> {
             ApplicationManager.saveUsers();
-            LoginMenu.mediaPlayer.stop();
+           // LoginMenu.mediaPlayer.stop();
             System.exit(0);
 
         });

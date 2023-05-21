@@ -7,14 +7,14 @@ public class User {
     private String password;
     public int level;
     public String AvatarUrl;
-    public Game SavedGame;
+   // public Game SavedGame;
     public int difficulty;
     public User(String username, String password) {
         this.username = username;
         this.password = password;
         this.level=1;
         this.AvatarUrl=User.class.getResource("/images/icons/Sensibleworld-Starwars-Stormtrooper.512.png").toString();
-        this.SavedGame=null;
+       // this.SavedGame=null;
         this.difficulty=2;
     }
 
