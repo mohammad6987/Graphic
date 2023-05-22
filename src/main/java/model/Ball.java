@@ -13,6 +13,7 @@ public class Ball extends Circle {
     private double accelerationY;
     public  boolean inMove;
     public double time;
+    public double SizeOverTime;
     public Line line;
     public Timeline CicularMovement;
     public Ball(double v, double v1, double v2, Paint paint) {
@@ -23,6 +24,7 @@ public class Ball extends Circle {
         accelerationY = 0;
         connectLine=null;
         time=0;
+        SizeOverTime=0;
         line =null;
     }
     public void update() {
@@ -30,8 +32,8 @@ public class Ball extends Circle {
         velocityX += accelerationX;
         velocityY += accelerationY;
         // Update the position based on the velocity
-        setCenterX(getCenterX() - velocityX);
-        setCenterY(getCenterY() - velocityY);
+        setCenterX(getCenterX() + velocityX);
+        setCenterY(getCenterY() + velocityY);
     }
 
     public double getVelocityX() {

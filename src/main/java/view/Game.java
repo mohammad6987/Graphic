@@ -1,5 +1,5 @@
 package view;
-
+import javafx.util.Duration;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -27,6 +27,7 @@ import javafx.util.Duration;
 import model.Ball;
 import model.MainBall;
 import java.util.ArrayList;
+import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Game extends Application {
@@ -36,7 +37,7 @@ public class Game extends Application {
     public static double wind=1.5;
     public static int freeze=5;
     public  int BallsCount=10;
-    public int clockwise =1;
+    public double clockwise =-1;
     public int BallsCountAtFirst=BallsCount;
     public MainBall mainBall;
     public Circle unknownBorder;
@@ -49,10 +50,12 @@ public class Game extends Application {
     Timeline Visibility;
     Timeline RealTime;
     Timeline Reverse;
+    Timeline Size;
     Timeline Wind;
     int speed=150;
-    public int Totaltime=120;
+    public int Totaltime=60;
     public double time=0;
+    public DoubleProperty timeCheck;
 
     ProgressBar progressBar = new ProgressBar();
 
@@ -64,6 +67,8 @@ public class Game extends Application {
     public double realFrame=frame;
     public boolean FreezeInPlay=false;
     public boolean ReverseInPlay=false;
+    public boolean SizeInPlay=false;
+    public boolean Invisibility;
 
     public static void setter(int spin,double wind,int freeze){
         Game.spin=spin;
@@ -75,10 +80,17 @@ public class Game extends Application {
     public void start(Stage stage) throws Exception {
 
 
-        //progressBar.progressProperty().bind(freezeProgress);
+       // timeCheck.set(0);
         progressBar.setStyle("-fx-accent: green;");
         progressBar.setLayoutY(15);
         progressBar.setLayoutX(10);
+        Label Timer=new Label("Time :"+(Totaltime-time));
+        Timer.setFont(Font.font("Ariel", FontWeight.BOLD, 20));
+        Timer.setTextFill(Color.BLACK);
+
+        Timer.setLayoutX(10);
+        Timer.setLayoutY(600);
+        gamepane.getChildren().add(Timer);
         //scene desiagn
         stage.setMinHeight(700);
         stage.setMinWidth(500);
@@ -98,7 +110,7 @@ public class Game extends Application {
         for(int i=1;i<BallsCount+6;i++){
             balls[i-1]=new Ball(240,600,10,Color.BLACK);
         }
-        Ball ball1=new Ball(240,340,10,Color.BLACK);
+        Ball ball1=new Ball(240,340,8,Color.BLACK);
         ball1.inMove=true;
         RoundingBalls.add(ball1);
         balls[BallsCount+4].time=4;
@@ -114,18 +126,32 @@ public class Game extends Application {
         gamepane.getChildren().addAll(balls);
         ballsCount=new SimpleIntegerProperty(BallsCount);
 
-
+            timeCheck=new SimpleDoubleProperty();
         RealTime=new Timeline(new KeyFrame(Duration.millis(16),event ->{
-            time+=0.016;
-
+            time+=realFrame;
+            timeCheck.set(time);
+            Timer.setText("Time : "+String.format("%3.2f",Totaltime-time));
             progressBar.setProgress((double) freezecount*0.25);
             for(Ball bally:balls){
                 if(bally.inMove){
                     bally.time+=frame;
+                    if(SizeInPlay){
+                        bally.SizeOverTime += frame;
+                        SizaChange(bally);
+                        if(time%8==0)
+                            clockwise=1;
+                        if(time%8==4)
+                            clockwise=-1;
+                    }
                     CircularMovement(bally);
-                   // System.out.println(clockwise);
-                  //  System.out.println(time+"\n");
-                   // System.out.println(bally.time);
+
+                    if(Invisibility){
+                        if(time%4==0)
+                            bally.setOpacity(0);
+                        if(time%4==2)
+                            bally.setOpacity(1);
+                    }
+
                 }
             }
         }));
@@ -137,7 +163,7 @@ public class Game extends Application {
         freezeBar.setCycleCount(-1);
         freezeBar.play();
         Freeze=new Timeline(new KeyFrame(Duration.millis(16),event ->{
-            frame=0.008;
+            frame=realFrame/2;
 
         }));
         Freeze.setCycleCount(312);
@@ -146,18 +172,33 @@ public class Game extends Application {
             FreezeInPlay=false;
 
         });
-        Reverse=new Timeline();
-        KeyFrame reverse1=new KeyFrame(Duration.seconds(4),event ->{
-            clockwise=(-1);
-        });
-        KeyFrame reverse2=new KeyFrame(Duration.seconds(4),event -> {
+        Timeline clockwiseIncrease=new Timeline(new KeyFrame(Duration.millis(1000),actionEvent -> {
             clockwise=1;
+        }));
+        clockwiseIncrease.setCycleCount(1);
+        Timeline clockwiseDecrease=new Timeline(new KeyFrame(Duration.millis(1000),actionEvent -> {
+            clockwise=-1;
+        }));
+        clockwiseDecrease.setCycleCount(1);
+        Reverse=new Timeline();
+        KeyFrame reverse1=new KeyFrame(Duration.millis(4050),event ->{
+            //clockwiseDecrease.play();
+            clockwise=1;
+        });
+        KeyFrame reverse2=new KeyFrame(Duration.millis(6000),event -> {
+            //clockwiseIncrease.play();
+            clockwise=-1;
 
         });
-        Reverse.getKeyFrames().add(0,reverse1);
-        Reverse.getKeyFrames().add(1,reverse2);
+        Reverse.getKeyFrames().addAll( reverse1,new KeyFrame(Duration.millis(16),actionEvent -> {}),reverse2,new KeyFrame(Duration.millis(16),actionEvent -> {}));
         Reverse.setCycleCount(Timeline.INDEFINITE);
-
+        timeCheck.addListener((observable,oldValue,newValue)->{
+            if(newValue.doubleValue()>Totaltime || YouLost){
+                RealTime.stop();
+                Timer.setText("Time : 0.00");
+                gamepane.setBackground(new Background(new BackgroundFill(Color.RED,new CornerRadii(5),new Insets(5))));
+            }
+        });
         Scene scene=new Scene(gamepane);
         gamepane.getChildren().add(progressBar);
         scene.setOnKeyPressed(keyEvent -> {
@@ -177,10 +218,14 @@ public class Game extends Application {
         });
 
         ballsCount.addListener((observable,oldValue,newValue)->{
-            if(ballsCount.get()<=(double)BallsCountAtFirst*0.75 && !ReverseInPlay){
-                Reverse.play();
+            if(ballsCount.get()<=(double)BallsCountAtFirst*0.75 && !ReverseInPlay && !SizeInPlay){
+               // Reverse.play();
                 ReverseInPlay=true;
-                System.out.println("hhdgfh");
+                SizeInPlay=true;
+                System.out.println("Reverse & Size active");
+            }
+            if(ballsCount.get()<=(double)BallsCountAtFirst*0.5 && !Invisibility){
+               Invisibility=true;
             }
 
         });
@@ -191,8 +236,8 @@ public class Game extends Application {
     public void CircularMovement(Ball ball){
         int speed=150;
 
-            ball.setAccelerationX(speed * Math.sin(ball.time));
-            ball.setAccelerationY(speed * Math.cos(ball.time));
+            ball.setAccelerationX(speed * Math.sin( clockwise * ball.time));
+            ball.setAccelerationY(speed * Math.cos( clockwise * ball.time));
             ball.setCenterX(240+ ball.getAccelerationX());
             ball.setCenterY(190+ ball.getAccelerationY());
 
@@ -238,8 +283,9 @@ public class Game extends Application {
                 gamepane.setBackground(new Background(new BackgroundFill(Color.GREEN,new CornerRadii(5),new Insets(5))));
             }
         }
-
-
+    }
+    public void SizaChange(Ball ball){
+        ball.setRadius(8+5*Math.abs(Math.sin(ball.SizeOverTime)));
     }
 
 }
