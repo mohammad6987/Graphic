@@ -12,6 +12,7 @@ public class Ball extends Circle {
     private double accelerationX;
     private double accelerationY;
     public  boolean inMove;
+    public boolean inLinerMove;
     public double time;
     public double SizeOverTime;
     public Line line;
