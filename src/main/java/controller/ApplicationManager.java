@@ -78,4 +78,6 @@ public class ApplicationManager {
         }
     }
 
+    public static void saveGame() {
+    }
 }

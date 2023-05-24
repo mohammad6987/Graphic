@@ -1,4 +1,7 @@
 package view;
+import javafx.scene.control.ListView;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -27,10 +30,13 @@ import javafx.util.Duration;
 import model.Ball;
 import model.MainBall;
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Game extends Application {
+    public static MediaPlayer mediaPlayer;
+    public int SongI;
     int i=0;
     public static int spin=10;
     public static double realSpin=((double)spin/200-0.02);
@@ -46,11 +52,8 @@ public class Game extends Application {
     ArrayList<Ball> RoundingBalls=new ArrayList<>();
     Timeline Linermove;
     public double freezecount=0;
-    Timeline Freeze;
-    Timeline Visibility;
-    Timeline RealTime;
-    Timeline Reverse;
-    Timeline Size;
+    public static Timeline Freeze;
+    public static Timeline RealTime;
     Timeline Wind;
     int speed=150;
     public int Totaltime=60;
@@ -78,8 +81,10 @@ public class Game extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-
-
+        SongI=1;
+        mediaPlayer=new MediaPlayer(new Media(Game.class.getResource("/media/Caitlin De Ville - TRUSTFALL.mp3").toString()));
+        mediaPlayer.play();
+        mediaPlayer.setCycleCount(-1);
         Label windCheck=new Label("wind :"+windSpeed);
         windCheck.setLayoutY(450);
         windCheck.setLayoutX(15);
@@ -206,6 +211,16 @@ public class Game extends Application {
                 progressBar.setProgress(0);
                 Freeze.play();
             }
+            else if(keyEvent.getCode().equals(KeyCode.ESCAPE)){
+                RealTime.stop();
+                Wind.stop();
+                Stage current=new Stage();
+                try {
+                    new PauseMenu().start(current);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
         });
 
         ballsCount.addListener((observable,oldValue,newValue)->{
@@ -231,6 +246,7 @@ public class Game extends Application {
         ball.setAccelerationY(speed * Math.cos( clockwise * ball.time));
         ball.setCenterX(240+ ball.getAccelerationX());
         ball.setCenterY(190+ ball.getAccelerationY());
+
 
     }
     public void LinerMove(Ball ball,double x,double y){
@@ -268,7 +284,9 @@ public class Game extends Application {
             ball.inMove=true;
             freezecount+=0.02;
             RoundingBalls.add(ball);
-
+            double collisionX = ball.getCenterX();
+            double collisionY = ball.getCenterY();
+            ball.time = Math.atan2(collisionX - 240, collisionY - 190);
             CircularMovement(ball);
             if(ballsCount.get()==0){
                 RealTime.stop();
