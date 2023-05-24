@@ -54,7 +54,7 @@ public class Game extends Application {
     public double freezecount=0;
     public static Timeline Freeze;
     public static Timeline RealTime;
-    Timeline Wind;
+    public static Timeline Wind;
     int speed=150;
     public int Totaltime=60;
     public double time=0;

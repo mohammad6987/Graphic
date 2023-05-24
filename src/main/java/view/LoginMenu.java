@@ -24,11 +24,10 @@ public class LoginMenu extends Application {
         ApplicationManager applicationManager=new ApplicationManager();
         ApplicationManager.loadUsers();
         ApplicationManager.sortUsers();
-      /*  Media media1=new Media(LoginMenu.class.getResource("/media/Thomas Bergersen - Starvation - musicgeek.ir.mp3").toString());
-        Media media2=new Media(LoginMenu.class.getResource("/media/Thomas Bergersen - Immortal - musicgeek.ir.mp3").toString());
-        mediaPlayer=new MediaPlayer(media2);
+      Media media1=new Media(LoginMenu.class.getResource("/media/01. The Strength to Make a Stand.mp3").toString());
+      mediaPlayer=new MediaPlayer(media1);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-        mediaPlayer.play();*/
+        mediaPlayer.play();
         LoginMenu.stage = stage;
         URL url = LoginMenu.class.getResource("/FXML/loginMenu.fxml");
         BorderPane borderPane = FXMLLoader.load(url);

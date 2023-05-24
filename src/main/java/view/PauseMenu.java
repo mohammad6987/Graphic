@@ -101,7 +101,10 @@ public class PauseMenu extends Application {
         
         Scene scene=new Scene(pause);
         stage.setScene(scene);
-        stage.setOnCloseRequest(windowEvent -> Game.RealTime.play());
+        stage.setOnCloseRequest(windowEvent -> {
+            Game.RealTime.play();
+            Game.Wind.play();
+        });
         stage.show();
 
     }
