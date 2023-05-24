@@ -72,6 +72,7 @@ public class Game extends Application {
     public boolean ReverseInPlay=false;
     public boolean SizeInPlay=false;
     public boolean Invisibility;
+    public boolean WindInProgress=false;
 
     public static void setter(int spin,double wind,int freeze){
         Game.spin=spin;
@@ -81,7 +82,7 @@ public class Game extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        SongI=1;
+        gamepane.setMinWidth(480);
         mediaPlayer=new MediaPlayer(new Media(Game.class.getResource("/media/Caitlin De Ville - TRUSTFALL.mp3").toString()));
         mediaPlayer.play();
         mediaPlayer.setCycleCount(-1);
@@ -98,7 +99,7 @@ public class Game extends Application {
         Timer.setTextFill(Color.BLACK);
 
         Timer.setLayoutX(10);
-        Timer.setLayoutY(600);
+        Timer.setLayoutY(620);
         gamepane.getChildren().add(Timer);
         //scene desiagn
         stage.setMinHeight(700);
@@ -146,7 +147,7 @@ public class Game extends Application {
                     bally.time+=frame;
                     if(SizeInPlay){
                         bally.SizeOverTime += frame;
-                        SizaChange(bally);
+                        SizeChange(bally);
                         if(Math.floor(time)%8==0)
                             clockwise=1;
                         if(Math.floor(time)%8==4)
@@ -162,6 +163,8 @@ public class Game extends Application {
                     }
 
                 }
+                if(!bally.inMove)
+                    bally.update();
             }
         }));
         RealTime.setCycleCount(-1);
@@ -186,11 +189,12 @@ public class Game extends Application {
             windCheck.setText("wind :"+windSpeed);
         }));
         Wind.setCycleCount(-1);
-        Wind.play();
 
         timeCheck.addListener((observable,oldValue,newValue)->{
             if(newValue.doubleValue()>Totaltime || YouLost){
                 RealTime.stop();
+                Wind.stop();
+                mediaPlayer.stop();
                 Timer.setText("Time : 0.00");
                 gamepane.setBackground(new Background(new BackgroundFill(Color.RED,new CornerRadii(5),new Insets(5))));
             }
@@ -221,6 +225,36 @@ public class Game extends Application {
                     throw new RuntimeException(e);
                 }
             }
+            else if(keyEvent.getCode().equals(KeyCode.RIGHT) ){
+                for(Ball bell:balls){
+                    if(!bell.inMove){
+                        bell.setVelocityX(2);
+                    }
+                }
+            }
+            else if(keyEvent.getCode().equals(KeyCode.LEFT)){
+                for(Ball bell:balls){
+                    if(!bell.inMove){
+                        bell.setVelocityX(-2);
+                    }
+                }
+            }
+        });
+        scene.setOnKeyReleased(keyEvent -> {
+            if(keyEvent.getCode().equals(KeyCode.LEFT)){
+                for(Ball bell:balls){
+                    if(!bell.inMove){
+                        bell.setVelocityX(0);
+                    }
+                }
+            }
+            if(keyEvent.getCode().equals(KeyCode.RIGHT)){
+                for(Ball bell:balls){
+                    if(!bell.inMove){
+                        bell.setVelocityX(0);
+                    }
+                }
+            }
         });
 
         ballsCount.addListener((observable,oldValue,newValue)->{
@@ -233,6 +267,11 @@ public class Game extends Application {
             if(ballsCount.get()<=(double)BallsCountAtFirst*0.5 && !Invisibility){
                 Invisibility=true;
             }
+            if(ballsCount.get()<=(double)BallsCountAtFirst*0.25 && !WindInProgress){
+                WindInProgress=true;
+                Wind.play();
+            }
+
 
         });
 
@@ -277,16 +316,14 @@ public class Game extends Application {
                 YouLost=true;
                 gamepane.setBackground(new Background(new BackgroundFill(Color.RED,new CornerRadii(5),new Insets(5))));
                 RealTime.stop();
-                //Circularmove.stop();
                 return;
             }
             Linermove.stop();
             ball.inMove=true;
             freezecount+=0.02;
             RoundingBalls.add(ball);
-            double collisionX = ball.getCenterX();
-            double collisionY = ball.getCenterY();
-            ball.time = Math.atan2(collisionX - 240, collisionY - 190);
+            ball.time = Math.atan((ball.getCenterX() - 240) / (ball.getCenterY() - 190));
+           // if(ball.time==)
             CircularMovement(ball);
             if(ballsCount.get()==0){
                 RealTime.stop();
@@ -294,7 +331,7 @@ public class Game extends Application {
             }
         }
     }
-    public void SizaChange(Ball ball){
+    public void SizeChange(Ball ball){
         ball.setRadius(8+5*Math.abs(Math.sin(ball.SizeOverTime)));
     }
 

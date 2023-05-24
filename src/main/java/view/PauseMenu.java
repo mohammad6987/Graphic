@@ -88,6 +88,10 @@ public class PauseMenu extends Application {
                     Game.mediaPlayer.play();
                 }
                 else if(Game.mediaPlayer.getMedia().getSource().equals(PauseMenu.class.getResource("/media/Thomas Bergersen - Starvation - musicgeek.ir.mp3").toString())){
+                    Game.mediaPlayer = new MediaPlayer(new Media(PauseMenu.class.getResource("/media/01. The Strength to Make a Stand.mp3").toString()));
+                    Game.mediaPlayer.play();
+                }
+                else if(Game.mediaPlayer.getMedia().getSource().equals(PauseMenu.class.getResource("/media/01. The Strength to Make a Stand.mp3").toString())){
                     Game.mediaPlayer = new MediaPlayer(new Media(PauseMenu.class.getResource("/media/Caitlin De Ville - TRUSTFALL.mp3").toString()));
                     Game.mediaPlayer.play();
                 }

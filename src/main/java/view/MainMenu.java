@@ -19,13 +19,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import model.Data;
-
-import java.net.ResponseCache;
 import java.net.URL;
-import java.util.concurrent.BlockingDeque;
-
 public class MainMenu extends Application {
     @Override
     public  void start(Stage stage) throws Exception {
@@ -178,6 +173,26 @@ public class MainMenu extends Application {
             }
         });
         stackPane2.setOnMousePressed(mouseEvent -> {
+            Game game=new Game();
+            if(ApplicationManager.loggedUser != null){
+                switch (ApplicationManager.loggedUser.difficulty){
+                    case 1:
+                        Game.freeze=7;
+                        break;
+                    case 2:
+                        Game.freeze=5;
+                        break;
+                    case 3:
+                        Game.freeze=3;
+                        break;
+                }
+                try {
+                    game.start(stage);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
 
         });
         stackPane3.setOnMousePressed(mouseEvent -> {
