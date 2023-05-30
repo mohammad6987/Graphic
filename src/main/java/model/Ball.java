@@ -8,6 +8,9 @@ import javafx.scene.shape.Line;
 public class Ball extends Circle {
     ConnectLine connectLine;
     private double velocityX;
+    public boolean fisrtRotate=false;
+    public double IntersectX;
+    public double IntersectY;
     private double velocityY;
     private double accelerationX;
     private double accelerationY;

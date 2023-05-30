@@ -27,10 +27,13 @@ import model.Ball;
 import model.MainBall;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import static java.lang.Double.NaN;
 
-public class Game extends Application {
+public class Game2 extends Application {
     public static MediaPlayer mediaPlayer;
+    public int SongI;
+    int i=0;
     public static int spin=10;
     public static double realSpin=((double)spin/200-0.02);
     public static double wind=1.5;
@@ -52,11 +55,13 @@ public class Game extends Application {
     public int Totaltime=60;
     public double time=0;
     public DoubleProperty timeCheck;
+    public boolean Reverse=false;
+
     public int windSpeed=0;
     ProgressBar progressBar = new ProgressBar();
 
     public boolean YouLost=false;
-    public boolean YouWin=false;
+    public Timeline Condition;
     Ball[] balls=new Ball[BallsCount+5];
     public double a=1;
     public double frame=0.016;
@@ -76,6 +81,7 @@ public class Game extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         gamepane.setMinWidth(480);
+        gamepane.setMinHeight(750);
         mediaPlayer=new MediaPlayer(new Media(Game.class.getResource("/media/Caitlin De Ville - TRUSTFALL.mp3").toString()));
         //mediaPlayer.play();
         mediaPlayer.setCycleCount(-1);
@@ -97,8 +103,8 @@ public class Game extends Application {
         //scene desiagn
         stage.setMinHeight(700);
         stage.setMinWidth(500);
-        mainBall=new MainBall(240,190,95, Color.BLACK);//0
-        unknownBorder=new Circle(240,190,150,Color.TRANSPARENT);//1
+        mainBall=new MainBall(240,300,95, Color.BLACK);//0
+        unknownBorder=new Circle(240,300,150,Color.TRANSPARENT);//1
         gamepane.getChildren().addAll(unknownBorder,mainBall);
 
         Label count =new Label(""+BallsCount);
@@ -106,16 +112,17 @@ public class Game extends Application {
 
 
         count.setLayoutX(224);
-        count.setLayoutY(174);
+        count.setLayoutY(287);
         count.setTextFill(Color.WHITE);
         count.setFont(Font.font("Ariel", FontWeight.BOLD, 30));
         gamepane.getChildren().add(count);
         for(int i=1;i<BallsCount+6;i++){
-            balls[i-1]=new Ball(240,600,10,Color.BLACK);
+            if(i%2==0)
+                balls[i-1]=new Ball(240,620,10,Color.BLUE);
+            if(i%2==1)
+                balls[i-1]=new Ball(240,25,10,Color.DARKVIOLET);
+
         }
-        Ball ball1=new Ball(240,340,8,Color.BLACK);
-        ball1.inMove=true;
-        RoundingBalls.add(ball1);
         balls[BallsCount+4].time=4;
         balls[BallsCount+4].inMove=true;
         balls[BallsCount+3].time=3;
@@ -143,17 +150,22 @@ public class Game extends Application {
                     else {
                         bally.setCenterY(bally.IntersectY);
                         bally.setCenterX(bally.IntersectX);
-                        System.out.println(bally.IntersectX+"   "+bally.IntersectY);
                         bally.fisrtRotate=false;
-                        bally.time=Math.atan((bally.IntersectX-240)/(bally.IntersectY-300));
+                        bally.time=Math.atan((bally.IntersectX-300)/(bally.IntersectY-240));
                     }
                     if(SizeInPlay){
                         bally.SizeOverTime += frame;
                         SizeChange(bally);
-                        if(Math.floor(time)%8==0)
-                            clockwise=1;
-                        if(Math.floor(time)%8==4)
-                            clockwise=-1;
+                        if(Math.floor(time)%8==0  && !Reverse) {
+                            clockwise = 1;
+                            Reverse=true;
+                            bally.time+=Math.PI;
+                        }
+                        if(Math.floor(time)%8==4 && Reverse) {
+                            clockwise = -1;
+                            Reverse=false;
+                            bally.time-=Math.PI;
+                        }
                     }
                     CircularMovement(bally);
 
@@ -199,31 +211,17 @@ public class Game extends Application {
                 mediaPlayer.stop();
                 Timer.setText("Time : 0.00");
                 gamepane.setBackground(new Background(new BackgroundFill(Color.RED,new CornerRadii(5),new Insets(5))));
-                EndMenu.condition=false;
-                EndMenu.gamestage=stage;
 
-                try {
-                    new EndMenu().start(new Stage());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            if(YouWin){
-                EndMenu.condition=true;
-                EndMenu.gamestage=stage;
-
-                try {
-                    new EndMenu().start(new Stage());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
             }
         });
         Scene scene=new Scene(gamepane);
         gamepane.getChildren().add(progressBar);
         scene.setOnKeyPressed(keyEvent -> {
             if(keyEvent.getCode().equals(KeyCode.SPACE) && BallsCount>0 && !YouLost){
-                LinerMove(balls[BallsCount-1],windSpeed/2,-8);
+                if (BallsCount%2==0)
+                    LinerMove(balls[BallsCount-1],windSpeed/2,-8);
+                else
+                    LinerMove(balls[BallsCount-1],windSpeed/2,+8);
                 BallsCount-=1;
                 ballsCount.set(BallsCount);
                 count.setText(""+BallsCount);
@@ -245,32 +243,60 @@ public class Game extends Application {
                     throw new RuntimeException(e);
                 }
             }
-            else if(keyEvent.getCode().equals(KeyCode.RIGHT) ){
+            else if(keyEvent.getCode().equals(KeyCode.RIGHT) && WindInProgress){
                 for(Ball bell:balls){
-                    if(!bell.inMove){
+                    if(!bell.inMove && bell.getFill().equals(Color.BLUE)){
                         bell.setVelocityX(2);
                     }
                 }
             }
-            else if(keyEvent.getCode().equals(KeyCode.LEFT)){
+            else if(keyEvent.getCode().equals(KeyCode.LEFT) && WindInProgress){
                 for(Ball bell:balls){
-                    if(!bell.inMove){
+                    if(!bell.inMove && bell.getFill().equals(Color.BLUE)){
+                        bell.setVelocityX(-2);
+                    }
+                }
+            }
+            else if(keyEvent.getCode().equals(KeyCode.D) && WindInProgress){
+                for(Ball bell:balls){
+                    if(!bell.inMove && bell.getFill().equals(Color.DARKVIOLET)){
+                        bell.setVelocityX(2);
+                    }
+                }
+            }
+            else if(keyEvent.getCode().equals(KeyCode.A) && WindInProgress){
+                for(Ball bell:balls){
+                    if(!bell.inMove && bell.getFill().equals(Color.DARKVIOLET)){
                         bell.setVelocityX(-2);
                     }
                 }
             }
         });
         scene.setOnKeyReleased(keyEvent -> {
-            if(keyEvent.getCode().equals(KeyCode.LEFT)){
+            if(keyEvent.getCode().equals(KeyCode.LEFT) && WindInProgress){
                 for(Ball bell:balls){
-                    if(!bell.inMove){
+                    if(!bell.inMove && bell.getFill().equals(Color.BLUE)){
                         bell.setVelocityX(0);
                     }
                 }
             }
-            if(keyEvent.getCode().equals(KeyCode.RIGHT)){
+            if(keyEvent.getCode().equals(KeyCode.RIGHT) && WindInProgress){
                 for(Ball bell:balls){
-                    if(!bell.inMove){
+                    if(!bell.inMove && bell.getFill().equals(Color.BLUE)){
+                        bell.setVelocityX(0);
+                    }
+                }
+            }
+            if(keyEvent.getCode().equals(KeyCode.A) && WindInProgress){
+                for(Ball bell:balls){
+                    if(!bell.inMove && bell.getFill().equals(Color.DARKVIOLET)){
+                        bell.setVelocityX(0);
+                    }
+                }
+            }
+            if(keyEvent.getCode().equals(KeyCode.D) && WindInProgress){
+                for(Ball bell:balls){
+                    if(!bell.inMove  && bell.getFill().equals(Color.DARKVIOLET)){
                         bell.setVelocityX(0);
                     }
                 }
@@ -285,7 +311,7 @@ public class Game extends Application {
                 System.out.println("Reverse & Size active");
             }
             if(ballsCount.get()<=(double)BallsCountAtFirst*0.5 && !Invisibility){
-                Invisibility=true;
+              //  Invisibility=true;
             }
             if(ballsCount.get()<=(double)BallsCountAtFirst*0.25 && !WindInProgress){
                 WindInProgress=true;
@@ -304,7 +330,7 @@ public class Game extends Application {
         ball.setAccelerationX(speed * Math.sin( clockwise * ball.time));
         ball.setAccelerationY(speed * Math.cos( clockwise * ball.time));
         ball.setCenterX(240+ball.getAccelerationX());
-        ball.setCenterY(190+ball.getAccelerationY());
+        ball.setCenterY(300+ball.getAccelerationY());
 
 
     }
@@ -316,7 +342,7 @@ public class Game extends Application {
 
             ball.update();
             // System.out.println(Math.pow(ball.getCenterY()-190,2)+Math.pow(ball.getCenterX()-240,2));
-            if(Math.pow(ball.getCenterY()-190,2)+Math.pow(ball.getCenterX()-240,2)<=22500) {
+            if(Math.pow(ball.getCenterY()-240,2)+Math.pow(ball.getCenterX()-300,2)<=22500) {
                 ball.IntersectX=ball.getCenterX();
                 ball.IntersectY=ball.getCenterY();
                 manage(ball);
@@ -341,12 +367,11 @@ public class Game extends Application {
                 return;
             }
             if(ball.getCenterX()<0 || ball.getCenterY()<0 || ball.getCenterX()> 480){
-                System.out.println("you lose");
+                System.out.println("yopu lose");
                 YouLost=true;
                 gamepane.setBackground(new Background(new BackgroundFill(Color.RED,new CornerRadii(5),new Insets(5))));
                 RealTime.stop();
-                EndMenu endMenu=new EndMenu();
-                endMenu.condition=false;
+                return;
             }
             Linermove.stop();
             ball.inMove=true;
@@ -357,9 +382,8 @@ public class Game extends Application {
             ball.time=Math.atan2(ball.getCenterY()-190,ball.getCenterX()-190);
             if(ball.time==NaN)
                 ball.time=0;
-            if(ballsCount.get()==0 && ball.getCenterY()<400){
+            if(ballsCount.get()==0){
                 RealTime.stop();
-                YouWin=true;
                 gamepane.setBackground(new Background(new BackgroundFill(Color.GREEN,new CornerRadii(5),new Insets(5))));
             }
         }

@@ -5,6 +5,7 @@ import model.Data;
 import model.User;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import view.Game;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 public class ApplicationManager {
     public static String Address1= "C:\\Users\\Lenovo\\Downloads\\Telegram Desktop\\workshop\\src\\main\\resources\\Users.json";
     public static User loggedUser;
+    public static ArrayList<Game> games=new ArrayList<>();
 
     public static void saveUsers() {
         if(Data.getUsers() != null) {
@@ -79,5 +81,8 @@ public class ApplicationManager {
     }
 
     public static void saveGame() {
+        for(Game x:games){
+
+        }
     }
 }

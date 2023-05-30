@@ -4,6 +4,7 @@ import controller.ApplicationManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -21,6 +22,7 @@ public class LoginMenu extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        stage.getIcons().add(new Image(LoginMenu.class.getResource("/images/icons/Sensibleworld-Starwars-Stormtrooper.512.png").toString()));
         ApplicationManager applicationManager=new ApplicationManager();
         ApplicationManager.loadUsers();
         ApplicationManager.sortUsers();

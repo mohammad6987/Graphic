@@ -33,7 +33,7 @@ public class MainMenu extends Application {
         Scene scene = new Scene(pane);
         Label label0=new Label("You Haven't Logged in!");
         if(ApplicationManager.loggedUser != null)
-            label0=new Label("        "+ApplicationManager.loggedUser.username+"             Level: "+ApplicationManager.loggedUser.level+"       ");
+            label0=new Label("        "+ApplicationManager.loggedUser.username+"             Points: "+ApplicationManager.loggedUser.level+"       ");
         Label label1=new Label("Profile Menu");
         Label label2=new Label("Start New Game");
         Label label3=new Label("Load Game");
@@ -56,7 +56,7 @@ public class MainMenu extends Application {
         VBox TopPlayers=new VBox();
         VBox TopScores=new VBox();
         TopPlayers.getChildren().add(0,new Label(" Name:                                       "));
-        TopScores.getChildren().add(0,new Label("Level                                     "));
+        TopScores.getChildren().add(0,new Label("Points                                     "));
         ApplicationManager.loadUsers();
        ApplicationManager.sortUsers();
         for(int i=0;i< Math.min(Data.getUsers().size(),6);i++){
@@ -212,7 +212,11 @@ public class MainMenu extends Application {
 
         });
         stackPane5.setOnMousePressed(mouseEvent -> {
-
+            try {
+                new Game2().start(stage);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
         stackPane6.setOnMousePressed(mouseEvent -> {
             ApplicationManager.saveUsers();
